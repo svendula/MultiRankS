@@ -1,4 +1,4 @@
-# Fortney50
+# Estimating the underlying signal from multiple ranked lists
 Input rank matrix in Connectivity Map drug application 
 Fortney et al.(2015). Prioritizing therapeutics for lung cancer: an integrative meta-analysis of cancer gene signatures and chemogenomic data. PLoS Computational Biology.11(3).
 
