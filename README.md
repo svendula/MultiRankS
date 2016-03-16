@@ -1,4 +1,5 @@
 # Estimating the underlying signal from multiple ranked lists
+Vendula Svendova, Michael G. Schimek
 
 Application example from:
 
