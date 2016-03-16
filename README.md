@@ -13,3 +13,5 @@ Fortney50_input.csv - Input rank matrix
 Fortney50_single_est.csv - The signal estimate from the Input rank matrix
 
 Fortney50_boot.mean_est.csv - Mean of 30 bootstrap estimates (robust to contamination by 'bad exoerts')
+
+Fortney50_groundtruth.csv - Mean of the Connectivity Scores (ground truth)
