@@ -18,3 +18,5 @@ The data from Fortney et al. were provided under the terms of the Creative Commo
 [`Fortney50_boot.mean_est.csv`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/Fortney50_boot.mean_est.csv): Mean of 30 bootstrap estimates (robust to contamination by 'bad experts')
 
 [`Fortney50_groundtruth_median.csv`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/Fortney50_groundtruth_median.csv): Median of the Connectivity Scores (ground truth)
+
+[`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R): The source code of the algorithm.
