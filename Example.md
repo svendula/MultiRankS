@@ -15,7 +15,7 @@ The assumed model is \[X.\text{input}_{ij} = \text{theta.true}_{i} + Z_{ij},\] w
 In real-world applications, `theta.true` is not known. Here, we simulate it in order to evaluate our estimate. We aim to estimate the normalised true signal `theta.true.norm` and its ranking `true.rank`.
 
 ``` r
-source("MultiRankS_funs_thesis.R")
+source("MultiRankS_funs.R")
 p = 10  # number of objects 
 n = 10  # number of assessors 
 
