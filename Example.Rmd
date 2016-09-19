@@ -13,7 +13,7 @@ This is an example of the MultiRankS algorithm, as described in paper *Svendova,
 Here the number of objects, as well as assessors, is 5.
 
 ## Generate the input
-The assumed model is $$X.\text{input}_{ij} = \text{theta.true}_{i} + Z_{ij},$$ where $i=1,\ldots,p, j=1,\ldots,n$, and $Z\sim N(0,\sigma_j^2)$
+The assumed model is $X.\text{input}_{ij} = \text{theta.true}_{i} + Z_{ij},$ where $i=1,\ldots,p, j=1,\ldots,n$, and $Z\sim N(0,\sigma_j^2)$
 
 ### Simulate the true underlying signal `theta.true` 
 In real-world applications, `theta.true` is not known. Here, we simulate it in order to evaluate our estimate. We aim to estimate the normalised true signal `theta.true.norm` and its ranking `true.rank`.
