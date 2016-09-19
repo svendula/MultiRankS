@@ -1,0 +1,154 @@
+---
+title: "MultiRankS example"
+author: "Vendula Svendova"
+date: "5 September 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is an example of the MultiRankS algorithm, as described in paper *Svendova, Schimek: A novel method for estimating the underlying signal from multiple ranked lists*. 
+Here the number of objects, as well as assessors, is 5.
+
+## Generate the input
+The assumed model is $$X.\text{input}_{ij} = \text{theta.true}_{i} + Z_{ij},$$ where $i=1,\ldots,p, j=1,\ldots,n$, and $Z\sim N(0,\sigma_j^2)$
+
+### Simulate the true underlying signal `theta.true` 
+In real-world applications, `theta.true` is not known. Here, we simulate it in order to evaluate our estimate. We aim to estimate the normalised true signal `theta.true.norm` and its ranking `true.rank`.
+```{r,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+source('MultiRankS_funs_thesis.R')
+p = 10 # number of objects 
+n = 10 # number of assessors 
+
+set.seed(123)
+theta.true = sort(rnorm(p,0,1), decreasing = TRUE) # sorted true signal 
+theta.true.norm = theta.true/norm_vec(theta.true) # normalised true signal
+theta.true.norm
+true.rank = rank(-theta.true.norm) # the true rank - the largest value will have rank 1, the smallest rank 5
+true.rank
+plot(theta.true.norm, col='red', ylim=c(-1,1), type='b', pch=16, xlab='Object', ylab='Normalised true signal')
+```
+
+### Simulate the measurements `X.input` . 
+In real-world examples, `X.input` is either not known or contains incomparable values (e.g. one column has real values between 0 and 1, another has integers between 1 and 100).  In order to simulate `X.input`, one has to choose a reasonable variance added random variable $Z\sim N(0,\sigma_j^2)$. In this example, we choose each $\sigma_j$ as the absolute random value from normal distribution with 0 mean and standard deviation 0.3.
+```{r,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+set.seed(123)
+sigmas = abs(rnorm(n,0,0.4)) # random standard deviations for each assessors 
+X.input = matrix(nrow=p, ncol=n) # the matrix of observed measurements 
+for (i in 1:n)
+{
+  set.seed(i)
+  X.input[,i] = theta.true + rnorm(p,0,sigmas[i])
+}
+X.input # objects in rows, assessors in columns
+
+```
+
+### Construct the input rank matrix `R.input`.
+The rank matrix `R.input` is the only input for our algorithm.  Its columns are ranked columns of `X.input`.
+
+```{r,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+R.input = matrix(nrow=p, ncol=n) # the observed rankings 
+R.input = apply(X.input, 2, function(x) rank(-x)) 
+R.input # objects in rows, assessors in columns
+cor(R.input, method='spearman') # correlation between the assessors
+```
+
+### Calculate the list of probability matrices `F.input`
+For each window size $\ell=1,\ldots,\ell_0$, a $(p-\ell+1)\times p^{\ell}$ probability matrix is calculated and saved to `F.input`.
+```{r,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+l_0 = 2 # maximum window size 
+F.input = F_perm(R.input, l_0) 
+F.input
+```
+
+
+## Estimate the true signal
+###Construct bootstrap samples
+Sample from the columns of `R.input` with replacement in order to construct `num.boot` bootstrap rank matrices.
+```{r,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+num.boot = 50 # number of bootstrap matrices
+  boots = list() # list of bootstrap matrices
+  boots[[1]] = R.input  
+  for (b in 2:(num.boot+1))
+  {
+    set.seed(b)
+    ind = sample.int(n, n, replace=TRUE)
+   boots[[b]] = R.input[,ind]
+  }
+```
+
+###Run the Metropolis MCMC algorithm on each bootstrap matrix.
+ **!WARNING!** This step takes longer time, depending on the number of cores used. Maximum efficiancy on a single machine can be achieved by using `num.sim` cores, as the individual chains are run in parallel. The results of this step are saved in `Example_all_results.Rdata`.
+```{r eval=FALSE,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+chain.length = 10000 # length of an MCMC chain
+num.sim = 10 # number of independent chains
+cores = detectCores() # number of cores to run the algorithm on
+res = list() # here the results are stored
+
+set.seed(123)
+theta.inis = vector('list',num.sim)# initial guesses - one for each chain
+theta.inis = lapply(theta.inis, function(x) x= runif(p, -1,1))
+runtime = numeric()
+for (b in 1:(num.boot+1)) ## for each bootstrap matrix
+{
+  runtime[b] = system.time({
+  res.temp = MCMC.metropolis(theta.inis = theta.inis, in.data=list(boots[[b]], F.input), dev=0.1, chain.len=chain.length, cores=cores)
+  })[3]
+  res[[b]] = res.temp
+  save(runtime, res.temp, file = paste0('Example_boot',b,'.RData'))
+}
+save(res, file = 'Example_all_results.Rdata')
+```
+
+## Gather the results
+If the previous step was performed, comment out the first two lines.
+```{r eval=TRUE,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+ load('Example_all_results.Rdata') ; num.sim = 10
+indiv.estimates = replicate(num.boot+1, matrix(nrow=p, ncol=num.sim), simplify = FALSE) # initiate list of matrices, where the solutions are stored
+main.nrm.estimates = matrix(nrow=p, ncol=num.boot+1)
+
+for (b in 1:(num.boot+1))
+{
+  for (i in 1:num.sim)
+  {
+    if (is.numeric(res[[b]]$avg[[i]]$x.in.min))
+        indiv.estimates[[b]][,i] = res[[b]]$avg[[i]]$x.in.min
+    else indiv.estimates[[b]][,i] = res[[b]]$avg[[i]]$x.in.min[,1]
+  }
+  m = apply(indiv.estimates[[b]], 1, median) # median over 10 independent chains
+  m.nrm = m/norm_vec(m) # normalisation
+  
+  main.nrm.estimates[,b] = m.nrm
+}
+```
+
+## Plot the results with ggplot
+### Prepare 
+```{r eval=TRUE,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+melt.data = data.frame(melt(main.nrm.estimates))
+  colnames(melt.data) = c('object','boot','value')
+
+truth.est = data.frame(estimate=main.nrm.estimates[,1], true.signal=theta.true.norm, object = 1:nrow(main.nrm.estimates))
+truth.est = data.frame(melt(truth.est, id.vars = 'object'))
+```
+
+### Plot
+
+```{r, eval=TRUE,tidy=TRUE,tidy.opts=list(width.cutoff=60)}
+pl = ggplot(melt.data, aes(factor(object), value)) + ylim(-1,1)
+  pl = pl + xlab('Object') + ylab('Signal value') + geom_violin(trim = TRUE, scale='count',size=0.5) ## violin plots
+  pl = pl + geom_line(data=truth.est, aes(object, value, col=variable), size=1) # the true and estimated signal
+  pl = pl + stat_summary(data = melt.data, fun.data=mean_sterr, geom="errorbar", color='green', size=0.2) # error bars
+  pl = pl + stat_summary(fun.y=mean, geom="point",
+                         fill="black", shape=21, size=2, position = position_dodge(width = .9))
+  pl = pl + theme_bw() + theme(text = element_text(size=15)) + theme(legend.title=element_blank()) # white background, big letters
+  pl = pl + scale_colour_manual(values = c("blue",'red'),labels = c('Estimate', 'True signal')) # colors for true and estimated
+  pl = pl + theme(legend.text = element_text(size = 15), legend.key = element_blank(), legend.position = c(0.75, 0.65), legend.justification=c(0,0), legend.margin = unit(0, "cm"), panel.grid.minor=element_blank(), panel.grid.major=element_blank())
+  pl + scale_x_discrete(breaks = 1:p, labels=paste0('o',1:p)) # customised ticks
+```
+
+
+
