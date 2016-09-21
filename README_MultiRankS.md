@@ -1,6 +1,7 @@
 ## MultiRankS_funs.R 
- implementation of the method Svendova, Schimek: Estimating the underlying signal from multiple ranked lists
- coded by Vendula Svendova
+ Implementation of the method Svendova, Schimek: Estimating the underlying signal from multiple ranked lists.
+ 
+ Coded by Vendula Svendova
 
 
 Functions description:
