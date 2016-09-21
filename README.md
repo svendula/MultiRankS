@@ -1,7 +1,7 @@
 # Estimating the underlying signal from multiple ranked lists
 Vendula Svendova, Michael G. Schimek
 
-Here the source code and genomic application and results are provided.
+Here the source code and genomic application data and results are provided.
 
 ## Source code
 
