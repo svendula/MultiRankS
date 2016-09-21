@@ -1,6 +1,8 @@
 # Estimating the underlying signal from multiple ranked lists
 Vendula Svendova, Michael G. Schimek
 
+Here the source code and genomic application and results are provided.
+
 ## Source code
 
 [`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R): The source code of the algorithm.
