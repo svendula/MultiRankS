@@ -264,7 +264,7 @@ for (b in 2:(num.boot + 1)) {
 
 ### Run the Metropolis MCMC algorithm on each bootstrap matrix.
 
-**!WARNING!** This step takes longer time, depending on the number of cores used. Maximum efficiancy on a single machine can be achieved by using `num.sim` cores, as the individual chains are run in parallel. The results of this step are saved in `Example_all_results.Rdata`.
+**!WARNING!** This step takes longer time, depending on the number of cores used. Maximum efficiacy on a single machine can be achieved by using `num.sim` cores, as the individual chains are run in parallel. The results of this step are saved in `Example_all_results.Rdata`.
 
 ``` r
 chain.length = 10000 # length of an MCMC chain
