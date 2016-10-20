@@ -7,7 +7,7 @@ Here the source code and genomic application data and results are provided.
 
 [`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R): The source code of the algorithm.
 
-[`README_MultiRankS`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/README_MultiRankS.txt): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R)
+[`README_MultiRankS`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/README_MultiRankS.md): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R)
 
 
 ## Application example
