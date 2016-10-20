@@ -9,8 +9,6 @@ Here the source code and genomic application data and results are provided.
 
 [`README_MultiRankS`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/README_MultiRankS.txt): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/MultiRankS_funs.R)
 
-[`Example.md`](https://github.com/svendula/Estimating-the-underlying-signal-from-multiple-ranked-lists/blob/master/Example.md): An example of 10 objects and 10 assessors, that can be ran provided the source code 
-
 
 ## Application example
 
