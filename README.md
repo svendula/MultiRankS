@@ -23,9 +23,9 @@ The data from Fortney et al. were provided under the terms of the Creative Commo
 Fortney, K., Griesman, J., Kotlyar, M., Pastrello, C., Angeli, M., Sound-Tsao, M., and Jurisica, I. (2015). Prioritizing therapeutics for lung cancer: an integrative meta-analysis of cancer gene signatures and chemogenomic data. PLoS Computational Biology, 11(3):e1004068.
 
 
-[`Fortney30_input.csv`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R/blob/master/Fortney50_input.csv): Input rank matrix of the application example
+[`Fortney30_input.csv`](https://github.com/svendula/MultiRankS/blob/master/Fortney30_input.csv): Input rank matrix of the application example
 
-[`Fortney30_groundtruth_median.csv`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R/blob/master/Fortney50_groundtruth_median.csv): Median of the Connectivity Scores (ground truth) from the application example
+[`Fortney30_groundtruth_median.csv`](https://github.com/svendula/MultiRankS/blob/master/Fortney30_groundtruth_median.csv): Median of the Connectivity Scores (ground truth) from the application example
 
 
 
