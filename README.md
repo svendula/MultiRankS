@@ -1,5 +1,6 @@
 # A novel method for estimating the common signals for consensus across multiple ranked lists
-Vendula Svendova, Michael G. Schimek
+Švendová, Vendula, and Michael G. Schimek. Computational Statistics & Data Analysis (2017).
+http://www.sciencedirect.com/science/article/pii/S0167947317301056
 
 Here the source code and genomic application data and results are provided, under the terms of the LGPLv3 [`license`](https://github.com/svendula/MultiRankS/blob/master/LICENSE).
 
