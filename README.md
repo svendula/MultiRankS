@@ -1,6 +1,6 @@
 # MultiRankS
 
-MultiRankS is a tool for estimating the underlying signal from multiple ranked lists. It takes a matrix of ranks as an input, where rankers are in columns and ranked objects in rows. It outputs an estimated real vector of signal for each object. These signals are responsible for the rankings in a sense that they are the true values that the rankers intended to rank. The tools also calculates the standard errors of the signal estimates using either Metropolis-Hastings or adaptive MCMC optimisation.
+MultiRankS is a tool for estimating the underlying signal from multiple ranked lists. It takes a matrix of ranks as an input, where rankers are in columns and ranked objects in rows. It outputs an estimated real signal value for each object. These signals are responsible for the rankings in a sense that they are the true values that the rankers intended to rank. The tool also calculates the standard errors of the signal estimates using either Metropolis-Hastings or adaptive MCMC optimisation.
 
 For more details of the method, please refer to
 
