@@ -18,7 +18,7 @@ Here the source code and genomic application data and results are provided, unde
 
 ## Application example
 
-The application example was based on data from:
+The application example in the paper above was based on data from:
 
 Fortney et al. (2015). _Prioritizing therapeutics for lung cancer: an integrative meta-analysis of cancer gene signatures and chemogenomic data_. PLoS Computational Biology. 11(3). <http://dx.doi.org/10.1371/journal.pcbi.1004068>
 
