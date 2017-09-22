@@ -1,5 +1,10 @@
-# A novel method for estimating the common signals for consensus across multiple ranked lists
-Švendová, Vendula, and Michael G. Schimek. Computational Statistics & Data Analysis (2017).
+# MultiRankS
+
+MultiRankS is a tool for estimating the underlying signal from multiple ranked lists. It takes a matrix of ranks as an input, where rankers are in columns and ranked objects in rows. It outputs an estimated real vector of signal for each object. These signals are responsible for the rankings in a sense that they are the true values that the rankers intended to rank. The tools also calculates the standard errors of the signal estimates using either Metropolis-Hastings or adaptive MCMC optimisation.
+
+For more details of the method, please refer to
+
+Švendová, Vendula, and Michael G. Schimek (2017). A novel method for estimating the common signals for consensus across multiple ranked lists. *Computational Statistics & Data Analysis*, Volume 115, pp 122-135.
 http://www.sciencedirect.com/science/article/pii/S0167947317301056
 
 Here the source code and genomic application data and results are provided, under the terms of the LGPLv3 [`license`](https://github.com/svendula/MultiRankS/blob/master/LICENSE).
