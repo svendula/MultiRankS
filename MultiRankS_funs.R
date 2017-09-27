@@ -58,7 +58,7 @@ run.adaptiveMCMC.example = function(F.input, boots, num.sim, chain.length)
 {
   num.boot = length(boots)-1
   p=nrow(boots[[1]]); n=ncol(boots[[1]])
-  cores = detectCores() # number of cores to run the algorithm on
+  cores = detectCores()-1 # number of cores to run the algorithm on
   res = list() # here the results are stored
   
   set.seed(123)
