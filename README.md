@@ -18,13 +18,13 @@ Currently, the code cannot be installed directly from GitHub. To use the method,
 
 
 ## Example of usage
-Set up parameters
+Set up parameters (generally, larger values add to precision but also computatinal time)
 ```r
 source('MultiRankS_funs.R')
 p = 5 # number of objects
 n = 10 # number of rankers
 l_max = 2 # maximum height of the sliding window (larger value = longer computation)
-num.boot = 10 # number of bootstrap samples
+num.boot = 10 # number of bootstrap samples 
 chain.length = 10000 # length of the MCMC chain
 num.sim = 10 # number of independent chains
 ```
