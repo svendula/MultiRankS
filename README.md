@@ -42,7 +42,8 @@ F.input = F_perm(R.input, l__max)
 ```
 Run adaptive MCMC
 ```r
-results = run.adaptiveMCMC.example(F.input, boots, num.sim, chain.length)
+results.by.boot = run.adaptiveMCMC.example(F.input, boots, num.sim, chain.length)
+estimate = gather.results(results.by.boot)
 ```
 
 ## Application example in the reference article
