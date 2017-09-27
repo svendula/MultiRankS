@@ -38,7 +38,7 @@ boots = generate.bootstrap.samples(R.input,num.boot)
 ```
 Calculate the list of probability matrices for the input:
 ```r
-F.input = F_perm(R.input, l__max) 
+F.input = F_perm(R.input, l_max) 
 ```
 Run adaptive MCMC
 ```r
