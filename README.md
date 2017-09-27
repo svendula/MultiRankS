@@ -18,34 +18,32 @@ Currently, the code cannot be installed directly from GitHub. To use the method,
 
 
 ## Example of usage
-Load the functions
+Set up parameters
 ```r
 source('MultiRankS_funs.R')
+p = 5 # number of objects
+n = 10 # number of rankers
+l_max = 2 # maximum height of the sliding window (larger value = longer computation)
+num.boot = 10 # number of bootstrap samples
+chain.length = 10000 # length of the MCMC chain
+num.sim = 10 # number of independent chains
 ```
 Create a random matrix of ranks `R.input` - objects in rows, rankers in columns:
 ```r
-R.input = matrix(nrow=p, ncol=n)  
-R.input = apply(X.input, 2, function(x) rank(-x)) 
+R.input = generate.random.rank.matrix(p,n)
 ```
-Calculate the list of probability matrices (here maximum wondow height set to 2):
+Create bootstrap matrices
 ```r
-l_0 = 2 # maximum window size 
-F.input = F_perm(R.input, l_0) 
+boots = generate.bootstrap.samples(R.input,num.boot)
 ```
-Bootstrap from the input 
+Calculate the list of probability matrices:
 ```r
-num.boot = 50 # number of bootstrap matrices
-  boots = list() # list of bootstrap matrices
-  boots[[1]] = R.input  
-  for (b in 2:(num.boot+1))
-  {
-    set.seed(b)
-    ind = sample.int(n, n, replace=TRUE)
-   boots[[b]] = R.input[,ind]
-  }
+F.input = F_perm(R.input, l__max) 
 ```
-
-Run the MCMC
+Run adaptive MCMC
+```r
+results = run.adaptiveMCMC.example(F.input, boots, num.sim, chain.length)
+```
 
 ## Application example in the reference article
 
