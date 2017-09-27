@@ -104,7 +104,7 @@ generate.random.rank.matrix = function(p,n)
   
   R.input = matrix(nrow=p, ncol=n) # the observed rankings 
   R.input = apply(X.input, 2, function(x) rank(-x)) 
-  return(list(R=R.input,theta=theta.true))
+  return(R.input)
 }
 
 norm_vec = function(x) sqrt(sum(x^2)) # vector normalisation
