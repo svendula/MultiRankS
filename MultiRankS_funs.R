@@ -131,6 +131,20 @@ what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
 	return(sigma)
 }
 
+real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL) ### DEFINE FITNESS/OBJECTIVE FUNCTION
+{
+ if (is.null(increments)) increments=0.01
+ ### calculating appropriate sigma for each iteration:
+ sigma = what.is.suitable.sigma(theta,R.input,increments)
+ Z_ij = matrix(nrow=p, ncol=n)
+ Z_ij = apply(Z_ij, 2, function(x) rnorm(p, mean=0, sigma))
+ X = apply(Z_ij, 2, function(x) theta + x)
+ R = apply(X, 2, function(x) rank(-x, ties.method='random'))
+ F.temp = F_perm(R,l_max)
+ J.theta = J_theta(F.input, F.temp, l_max)
+ return(-J.theta)
+}	
+	   
 #-------------------------------------------
 #
 #        Classical Metropolis algorithm 

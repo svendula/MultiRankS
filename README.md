@@ -1,6 +1,6 @@
 # MultiRankS
 
-MultiRankS is a tool for estimating the underlying signal from multiple ranked lists. It takes a matrix of ranks as an input, where rankers are in columns and ranked objects in rows. It outputs an estimated real signal value for each object. These signals are responsible for the rankings in a sense that they are the true values that the rankers intended to rank. The tool also calculates the standard errors of the signal estimates using either Metropolis-Hastings or adaptive MCMC optimisation.
+MultiRankS is an R tool for estimating the underlying signal from multiple ranked lists. It takes a matrix of ranks as an input, where rankers are in columns and ranked objects in rows. It outputs an estimated real signal value for each object. These signals are responsible for the rankings in a sense that they are the true values that the rankers intended to rank. The tool also calculates the standard errors of the signal estimates using either Metropolis-Hastings or adaptive MCMC optimisation.
 
 For more details of the method, please refer to
 
@@ -10,13 +10,44 @@ http://www.sciencedirect.com/science/article/pii/S0167947317301056
 Here the source code and genomic application data and results are provided, under the terms of the LGPLv3 [`license`](https://github.com/svendula/MultiRankS/blob/master/LICENSE).
 
 ## Source code
+Currently, the code cannot be installed directly from GitHub. To use the method, you need to save the file `MultiRankS_funs.R` locally and run the script in R using `source('MultiRankS_funs.R')`.
 
 [`MultiRankS_funs.R`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R): The source code of the algorithm.
 
 [`README_MultiRankS`](https://github.com/svendula/MultiRankS/blob/master/README_MultiRankS.md): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R)
 
 
-## Application example
+## Example of usage
+Load the functions
+```r
+source('MultiRankS_funs.R')
+```
+Create a random matrix of ranks `R.input` - objects in rows, rankers in columns:
+```r
+R.input = matrix(nrow=p, ncol=n)  
+R.input = apply(X.input, 2, function(x) rank(-x)) 
+```
+Calculate the list of probability matrices (here maximum wondow height set to 2):
+```r
+l_0 = 2 # maximum window size 
+F.input = F_perm(R.input, l_0) 
+```
+Bootstrap from the input 
+```r
+num.boot = 50 # number of bootstrap matrices
+  boots = list() # list of bootstrap matrices
+  boots[[1]] = R.input  
+  for (b in 2:(num.boot+1))
+  {
+    set.seed(b)
+    ind = sample.int(n, n, replace=TRUE)
+   boots[[b]] = R.input[,ind]
+  }
+```
+
+Run the MCMC
+
+## Application example in the reference article
 
 The application example in the paper above was based on data from:
 
