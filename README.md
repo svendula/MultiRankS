@@ -25,8 +25,8 @@ p = 5 # number of objects
 n = 10 # number of rankers
 l_max = 2 # maximum height of the sliding window (larger value = longer computation)
 num.boot = 10 # number of bootstrap samples 
-chain.length = 10000 # length of the MCMC chain
-num.sim = 10 # number of independent chains
+chain.length = 1000 # length of the MCMC chain
+num.sim = 5 # number of independent chains
 ```
 Create a random matrix of ranks `R.input` - objects in rows, rankers in columns:
 ```r
