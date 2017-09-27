@@ -95,6 +95,7 @@ generate.random.rank.matrix = function(p,n)
   set.seed(123)
   sigmas = abs(rnorm(n,0,0.4)) # random standard deviations for each assessors 
   X.input = matrix(nrow=p, ncol=n) # the matrix of observed attributes
+  set.seed(1)
   theta.true = rnorm(p,0,1) # true signal
   for (i in 1:n)
   {
