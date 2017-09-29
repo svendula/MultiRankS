@@ -194,21 +194,22 @@ what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
   # R.input - input rank matrix
   # increments - the size of the increments of sigmas tested for suitability. Larger increments makes the algorithm faster, but tests less sigma-posibilities. Should be adjusted depending on the number of objects p (for p~10 increments = 0.05 are satisfactory)
   
-  p = nrow(R.input); n = ncol(R.input)
-  if (is.null(increments)) increments = 0.05
-  corInput = cor(R.input, method='spearman')
-  rho = median(corInput[lower.tri(corInput)]) ## average correlation
-  sigma_range = seq(0.01,1, by = increments) ## testing what correlation will be caused by each of the sigmas
-  rho.temp=numeric()
-  Xs = list() # list of measurement matrices, as produces by using the individual sigmas from sigma_range
-  for (sig in 1:length(sigma_range))
-  {
-    Xs[[sig]] = apply(matrix(nrow=p, ncol=n),2,function(x) x=theta + rnorm(p, mean=0, sd=sigma_range[sig])) 
-  }
-  corm=Map(function(x) cor(x,method='spearman'), Xs)  
-  rho.temp = sapply(corm, function(x) median(x[lower.tri(x)]))
-  sigma = sigma_range[which(abs(rho.temp-rho)==min(abs(rho.temp-rho)))][1] 
-  return(sigma)
+ 	if (is.null(increments)) increments = 0.05
+	p = nrow(R.input); n = ncol(R.input)
+    corInput = median(cor(R.input, method='spearman')) # average correlation
+    sigma_range = seq(0.01,0.5, by = increments) ## testing what correlation will be caused by each of the sigmas
+	sigma = numeric()
+    for (sig in 1:length(sigma_range))
+    {
+      Xs = apply(matrix(nrow=p, ncol=n),2,function(x) x=theta + rnorm(p, mean=0, sd=sigma_range[sig]))
+      medcor = median(cor(Xs, method='spearman'))
+      if (medcor > corInput-0.05 & medcor < corInput+0.05){
+        sigma = sigma_range[sig]
+        break
+      } 
+    }
+	if (length(sigma)==0) sigma=sigma_range[1]
+	return(sigma)
 }
 
 real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL) ### DEFINE FITNESS/OBJECTIVE FUNCTION
