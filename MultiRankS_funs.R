@@ -13,17 +13,19 @@ library(adaptMCMC)
 
 
 
-gather.results=function(res)
+gather.results <- function(res)
 {
+  # res - output of run.adaptiveMCMC 
   num.boot = length(res) - 1
-  num.sim = length(res[[1]]$avg)
+  num.chains = length(res[[1]]$avg)
   p = length(res[[1]]$avg[[1]]$x.in.min)
-  indiv.estimates = replicate(num.boot+1, matrix(nrow=p, ncol=num.sim), simplify = FALSE) # initiate list of matrices, where the solutions are stored
+  indiv.estimates = replicate(num.boot+1, matrix(nrow=p, ncol=num.chains), simplify = FALSE) 
+	# initiate list of matrices, where the solutions are stored
   main.nrm.estimates = matrix(nrow=p, ncol=num.boot+1)
   
   for (b in 1:(num.boot+1))
   {
-    for (i in 1:num.sim)
+    for (i in 1:num.chains)
     {
       if (is.numeric(res[[b]]$avg[[i]]$x.in.min))
         indiv.estimates[[b]][,i] = res[[b]]$avg[[i]]$x.in.min
@@ -38,16 +40,21 @@ gather.results=function(res)
   return(est.plus.SE)
 }
 
-run.adaptiveMCMC.example = function(F.input, boots, num.sim, chain.length)
+run.adaptiveMCMC <- function(F.input, boots, num.chains=10, chain.length, cores=detectCores(), inis=c(-1,1))
 {
+  # F.input - probability matrix for the input rank matrix
+  # boots - output of generate.bootstrap.samples
+  # num.chains - number of independent chains
+  # chain.length - length of each chain
+  # cores - number of cores to run on (running of chains parallelised)
+  # inis - range from which to generate initial guesses (from uniform distribution)
   num.boot = length(boots)-1
   p=nrow(boots[[1]]); n=ncol(boots[[1]])
-  cores = detectCores()-1 # number of cores to run the algorithm on
   res = list() # here the results are stored
   
   set.seed(123)
-  theta.inis = vector('list',num.sim)# initial guesses - one for each chain
-  theta.inis = lapply(theta.inis, function(x) x= runif(p, -1,1))
+  theta.inis = vector('list',num.chains)# initial guesses - one for each chain
+  theta.inis = lapply(theta.inis, function(x) x= runif(p, inis[1], inis[2]))
   for (b in 1:(num.boot+1)) ## for each bootstrap matrix
   {
       res.temp = adaptive.MCMC.metropolis(theta.inis = theta.inis, in.data=list(boots[[b]], F.input), chain.len=chain.length, cores=cores, l_max=length(F.input))
@@ -58,7 +65,7 @@ run.adaptiveMCMC.example = function(F.input, boots, num.sim, chain.length)
 
 
 
-generate.bootstrap.samples = function(R,num.boot)
+generate.bootstrap.samples <- function(R,num.boot)
 {
   # R - the input matrix
   # num.boot - number of bootstrap matrices
@@ -74,11 +81,13 @@ generate.bootstrap.samples = function(R,num.boot)
   return(boots)
 }
 
-generate.random.rank.matrix = function(p,n)
+generate.random.rank.matrix <- function(p,n)
 {
+  # p - number of objects
+  # n- number of assessors/rankers
   set.seed(123)
-  sigmas = abs(rnorm(n,0,0.4)) # random standard deviations for each assessors 
-  X.input = matrix(nrow=p, ncol=n) # the matrix of observed attributes
+  sigmas = abs(rnorm(n,0,0.4)) # random standard deviations for each assessor
+  X.input = matrix(nrow=p, ncol=n) # the matrix of observed attributes (X=theta+Z)
   set.seed(1)
   theta.true = rnorm(p,0,1) # true signal
   for (i in 1:n)
@@ -92,9 +101,9 @@ generate.random.rank.matrix = function(p,n)
   return(R.input)
 }
 
-norm_vec = function(x) sqrt(sum(x^2)) # vector normalisation
+norm_vec <- function(x) sqrt(sum(x^2)) # vector normalisation
 
-st.error.estim = function(x){sqrt(sum((x-mean(x))^2/(length(x)-1)))} # standard error estimation
+st.error.estim <- function(x){sqrt(sum((x-mean(x))^2/(length(x)-1)))} # standard error estimation
 
 mean_sterr <- function(x) { # estimation of mean and 2SE from numeric vector x
   data.frame("y" = mean(x), "ymin" = mean(x) - 2*st.error.estim(x), "ymax" = mean(x) + 2*st.error.estim(x))
@@ -103,13 +112,11 @@ mean_sterr <- function(x) { # estimation of mean and 2SE from numeric vector x
 
 F_perm <- function(R, l_max){
   ## Calculates a probability matrix for each window size up to l_max. Outputs a list of all the probability matrices.
-  
-  ## R - matrix of rankings, objects in rows, assessors in columns
-  ## l_max - maximum window height
+  # R - matrix of rankings, objects in rows, assessors in columns
+  # l_max - maximum window height
   
   p=nrow(R) # number of objects
-  n=ncol(R) # number of assessors
-  
+  n=ncol(R) # number of assessors 
   F.l = list() ## list of matrices F, each for different l
   for (ell in 1:l_max)
   { 
@@ -119,26 +126,24 @@ F_perm <- function(R, l_max){
       s <- s_mat[sri,];
       F_perm[,sri] <- rowSums(Reduce(`&`,Map(function(e,i) R[i:(p-length(s)+i),]<=e,s,seq_along(s))))/n 
     }
-    
     F.l[[ell]] = F_perm
     names(F.l)[[ell]] = paste("l=",ell,sep="") 
   }
   return(F.l = F.l)
 }
 
-J_theta = function(Fi, F.temp, l_max)
+J_theta <- function(F.input, F.temp, l_max)
 {
-  ## Calulates the value of the objective function J.
-  
-  # Fi - the input list of probability matrices (calculated from the true rank matrix)
+  ## Calulates the value of the objective function J. 
+  # F.input - the input list of probability matrices (calculated from the true rank matrix)
   # F.temp - another list of probability matrices (calculated from a current estimate)
   SumSl = 0
   Suml = 0
   for (ell in 1:l_max)
   {
-    for (sl in 1:ncol(Fi[[ell]]))
+    for (sl in 1:ncol(F.input[[ell]]))
     {
-      F1 = Fi[[ell]][,sl]
+      F1 = F.input[[ell]][,sl]
       F2 = F.temp[[ell]][,sl] 
       SumSl = SumSl + (F1 - F2)%*%(F1 - F2)
     }
@@ -152,8 +157,10 @@ J_theta = function(Fi, F.temp, l_max)
 
 FRgeneral <- function(theta, studies, l_max, R.input, F.input,increments=NULL) 
 {
-  ## Calculates a rank matrix R.temp, based on numerical vector theta. Matrix R.temp should resemble the input rank matrix R.input. The resemblance is achieved by generating a 'suitable' st.dev. with function what.is.suitable.sigma(). Outputs the rank matrix R.temp, its probablity matrices F.temp and the value of J J.theta.
-  
+  ## Calculates a rank matrix R.temp, based on numerical vector theta. 
+  ## Matrix R.temp should resemble the input rank matrix R.input. 
+  ## The resemblance is achieved by generating a suitable st.dev. with function what.is.suitable.sigma(). 
+  ## Outputs the rank matrix R.temp, its probablity matrices F.temp and the value of J.theta.  
   # theta - a numerical vector (current estimate)
   # l_max - maximum window size
   # R.input - input rank matrix
@@ -165,25 +172,27 @@ FRgeneral <- function(theta, studies, l_max, R.input, F.input,increments=NULL)
   X = apply(X, 2, function(x) theta + rnorm(nrow(R.input), mean=0, sigma))
   R.temp = apply(X, 2, function(x) rank(-x, ties.method='random'))
   
-  F.temp = F_perm(R.temp,l_max)
-  J.theta = J_theta(F.input, F.temp, l_max)
+  F.temp = F_perm(R=R.temp,l_max=l_max)
+  J.theta = J_theta(F.input=F.input, F.temp=F.temp, l_max=l_max)
   return(list(J = J.theta, F = F.temp, R = R.temp))	
 }
 
 what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
 {
-  ## Estimates a st.dev. needed to create a rank matrix as similar to R.input as possible, using the vector theta. Outputs the most suitable sigma for theta.
-  
+  ## Estimates a st.dev. needed to create a rank matrix as similar to R.input as possible, using the vector theta. 
+  ## Outputs the most suitable sigma for theta.
   # theta - a numerical vector (current estimate)
   # R.input - input rank matrix
-  # increments - the size of the increments of sigmas tested for suitability. Larger increments makes the algorithm faster, but tests less sigma-posibilities. Should be adjusted depending on the number of objects p (for p~10 increments = 0.05 are satisfactory)
+  # increments - the size of the increments of sigmas tested for suitability. 
+	# Larger increments makes the algorithm faster, but tests less sigma-posibilities. 
+	# Should be adjusted depending on the number of objects p (for p~10 increments = 0.05 are satisfactory)
   
- 	if (is.null(increments)) increments = 0.05
-	p = nrow(R.input); n = ncol(R.input)
-    corInput = median(cor(R.input, method='spearman')) # average correlation
-    sigma_range = seq(0.01,0.5, by = increments) ## testing what correlation will be caused by each of the sigmas
-	sigma = numeric()
-    for (sig in 1:length(sigma_range))
+  if (is.null(increments)) increments = 0.05
+  p = nrow(R.input); n = ncol(R.input)
+  corInput = median(cor(R.input, method='spearman')) # average correlation
+  sigma_range = seq(0.01,0.5, by = increments) ## testing what correlation will be caused by each of the sigmas
+  sigma = numeric()
+  for (sig in 1:length(sigma_range))
     {
       Xs = apply(matrix(nrow=p, ncol=n),2,function(x) x=theta + rnorm(p, mean=0, sd=sigma_range[sig]))
       medcor = median(cor(Xs, method='spearman'))
@@ -192,36 +201,45 @@ what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
         break
       } 
     }
-	if (length(sigma)==0) sigma=sigma_range[1]
-	return(sigma)
+  if (length(sigma)==0) sigma=sigma_range[1]
+  return(sigma)
 }
 
-real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL) ### DEFINE FITNESS/OBJECTIVE FUNCTION
+real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL) 
 {
-  if (is.null(increments)) increments=0.01
-  ### calculating appropriate sigma for each iteration:
-  sigma = what.is.suitable.sigma(theta,R.input,increments)
-  Z_ij = matrix(nrow=p, ncol=n)
-  Z_ij = apply(Z_ij, 2, function(x) rnorm(p, mean=0, sigma))
-  X = apply(Z_ij, 2, function(x) theta + x)
-  R = apply(X, 2, function(x) rank(-x, ties.method='random'))
-  F.temp = F_perm(R,l_max)
-  J.theta = J_theta(F.input, F.temp, l_max)
-  return(-J.theta)
+ ## Calculates the value of the objective/fitness function J
+ # theta - current estimate
+ # n- number of assessors/rankers
+ # p - number of objects
+ # l_max - maximum window size
+ # F.input - input list of probability matrices of R.input
+ # R.input - input rank matrix
+	
+ if (is.null(increments)) increments=0.01
+ ### calculating appropriate sigma for each iteration:
+ sigma = what.is.suitable.sigma(theta,R.input,increments)
+ Z_ij = matrix(nrow=p, ncol=n)
+ Z_ij = apply(Z_ij, 2, function(x) rnorm(p, mean=0, sigma))
+ X = apply(Z_ij, 2, function(x) theta + x)
+ R = apply(X, 2, function(x) rank(-x, ties.method='random'))
+ F.temp = F_perm(R=R,l_max=l_max)
+ J.theta = J_theta(F.input=F.input, F.temp=F.temp, l_max=l_max)
+ return(-J.theta)
 } 
 
-#-------------------------------------------
+#-----------------------------------------------
 #
-#        Classical Metropolis algorithm 
+#    Classical Metropolis-Hastings algorithm 
 #
-#-------------------------------------------
+#-----------------------------------------------
 
 MCMC.metropolis <- function(theta.inis,in.data, dev, chain.len, cores=detectCores(), increments=NULL){
-  ## Runs several independent Metropolis MCMC chains (function onerun()). Number of chains depends on the length of initial guesses theta.inis. Outputs list of the results (chain + best estimate + minimum found) and runtime
-  
+  ## Runs several independent Metropolis MCMC chains (function onerun()). 
+  ## Number of chains depends on the length of initial guesses theta.inis. 
+  ## Outputs list of the results (chain + best estimate + minimum found) and runtime
   # theta.inis - a list of vectors of initial guesses, the length of the list determines the number of chains 
   # in.data - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
-  # dev - the standard deviation defining every next proposal step of the random walk
+  # dev - the standard deviation defining next proposal step of the random walk
   # chain.len - length of each chain
   # cores - number of cores to be used
   # increments - see what.is.suitable.sigma() function
@@ -229,11 +247,11 @@ MCMC.metropolis <- function(theta.inis,in.data, dev, chain.len, cores=detectCore
   # clusterApply() for Windows
   if (Sys.info()[1] == "Windows"){
     cl <- makeCluster(cores)
-    clusterExport(cl, list("onerun", "run_metropolis_MCMC", "FRgeneral", "what.is.suitable.sigma", "F_perm", "J_theta", "proposalfunction"))
+    clusterExport(cl, list("onerun", "run_metropolis_MCMC", "FRgeneral", "real.fitness", "what.is.suitable.sigma", "F_perm", "J_theta", "proposalfunction"))
     runtime <- system.time({
       res = clusterApplyLB(cl=cl, x=theta.inis, fun=onerun, input=in.data, dev=dev, its=chain.len, l_max=2)
     })[3]
-    stopCluster(cl) # Don't forget to do this!
+    stopCluster(cl) 
     
     # mclapply() for everybody else
   } else {
@@ -244,9 +262,10 @@ MCMC.metropolis <- function(theta.inis,in.data, dev, chain.len, cores=detectCore
   return(list(avg=res, runtime=runtime))
 }
 
-onerun <- function(theta.ini, input, dev=NULL, its, l_max, increments=NULL){ # 
-  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), and the value of the minimum (minJ).
-  
+onerun <- function(theta.ini, input, dev=NULL, its, l_max, increments=NULL){ 
+  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. 
+  ## Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), 
+  ## and the value of the minimum (minJ).
   # theta.ini - the initial guess (numeric vector)
   # input - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
   # dev - the standard deviation defining every next proposal step of the random walk
@@ -279,10 +298,9 @@ onerun <- function(theta.ini, input, dev=NULL, its, l_max, increments=NULL){ #
   else all.x.in.mins = x.at.mins
   return(list(x.in.min=all.x.in.mins, chain=res.chain, minJ=min(res.chain$Js), acceptance=acceptance))
 }
-
+					     
 run_metropolis_MCMC <- function(theta.ini, iterations, dev, Ri, Fi,l_0,increments=NULL){
   ## Calculates Metropolis MCMC chain. Outputs the chain (all visited points) and the values of J in ech point.
-  
   # theta.ini - initial point (numerical vector)
   # iterations - number of mcmc steps (length of the chain)
   # dev - the standard deviation defining every next proposal step of the random walk
@@ -331,8 +349,6 @@ proposalfunction <- function(param, stdev){
   return(param+e)
 }
 
-
-
 #-------------------------------------------
 #
 #        Adaptive Metropolis algorithm 
@@ -340,9 +356,10 @@ proposalfunction <- function(param, stdev){
 #
 #-------------------------------------------
 
-adaptive.MCMC.metropolis <- function(theta.inis,in.data, chain.len,  cores=detectCores(), l_max=NULL, increments=NULL, scale=NULL){
-  ## Runs several independent Metropolis MCMC chains (function onerun()). Number of chains depends on the length of initial guesses theta.inis. Outputs list of the results (chain + best estimate + minimum found) and runtime
-  
+adaptive.MCMC.metropolis <- function(theta.inis, in.data, chain.len,  cores=detectCores(), l_max=NULL, increments=NULL, scale=NULL){
+  ## Runs several independent Metropolis MCMC chains (function onerun()). 
+  ## Number of chains depends on the length of initial guesses theta.inis. 
+  ## Outputs list of the results (chain + best estimate + minimum found) and runtime.
   # theta.inis - a list of vectors of initial guesses, the length of the list determines the number of chains 
   # in.data - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
   # dev - the standard deviation defining every next proposal step of the random walk
@@ -371,8 +388,9 @@ adaptive.MCMC.metropolis <- function(theta.inis,in.data, chain.len,  cores=detec
 }
 
 onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL, scale=NULL){ # 
-  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), and the value of the minimum (minJ).
-  
+  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. 
+  ## Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), 
+  ## and the value of the minimum (minJ).
   # theta.ini - the initial guess (numeric vector)
   # input - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
   # its - length of the chain
@@ -392,6 +410,7 @@ onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL,
   Ri = input[[1]]
   Fi = input[[2]]
   
+  library(adaptMCMC)
   res = MCMC(p=function(x) real.fitness(x,n=ncol(Ri),p=nrow(Ri),l_max,Fi,Ri,increments), n=its, init=theta.ini, acc.rate = 0.234, scale=scale,adapt=TRUE, n.start=100)
   minimum = res$samples[its,]
   minJ=-max(res$log.p)
