@@ -5,6 +5,10 @@
 
 Functions description:
 
+  - `gather.results`: gather the estimate (mean over bootstraps) and standard error for each object
+  - `run.adaptiveMCMC`: run adaptive MCMC on each bootstrap sample 
+  - `generate.bootstrap.samples`: generate bootstrap rank matrices
+  - `generate.random.rank.matrix`: generate an examplematrix of rankings of objects (rows) by rankers (columns)
   - `norm_vec`: normalises a vector in order to have unit norm
   - `st.error.estim`: calculates standard error
   - `mean_sterr`: calculates standard error and the mean of the values
