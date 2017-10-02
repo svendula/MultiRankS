@@ -1,8 +1,5 @@
 ## MultiRankS_funs.R 
 
- Coded by Vendula Svendova
-
-
 Functions description:
 
   - `gather.results`: gather the estimate (mean over bootstraps) and standard error for each object
