@@ -12,7 +12,6 @@ library(parallel)
 library(adaptMCMC)
 
 
-
 gather.results <- function(res)
 {
   # res - output of run.adaptiveMCMC 
@@ -40,6 +39,7 @@ gather.results <- function(res)
   return(est.plus.SE)
 }
 
+
 run.adaptiveMCMC <- function(F.input, boots, num.chains=10, chain.length, cores=detectCores(), inis=c(-1,1))
 {
   # F.input - probability matrix for the input rank matrix
@@ -64,7 +64,6 @@ run.adaptiveMCMC <- function(F.input, boots, num.chains=10, chain.length, cores=
 }
 
 
-
 generate.bootstrap.samples <- function(R,num.boot)
 {
   # R - the input matrix
@@ -81,6 +80,7 @@ generate.bootstrap.samples <- function(R,num.boot)
   return(boots)
 }
 
+		      
 generate.random.rank.matrix <- function(p,n)
 {
   # p - number of objects
@@ -101,10 +101,13 @@ generate.random.rank.matrix <- function(p,n)
   return(R.input)
 }
 
+		  
 norm_vec <- function(x) sqrt(sum(x^2)) # vector normalisation
 
+		  
 st.error.estim <- function(x){sqrt(sum((x-mean(x))^2/(length(x)-1)))} # standard error estimation
 
+		  
 mean_sterr <- function(x) { # estimation of mean and 2SE from numeric vector x
   data.frame("y" = mean(x), "ymin" = mean(x) - 2*st.error.estim(x), "ymax" = mean(x) + 2*st.error.estim(x))
 }
@@ -132,6 +135,7 @@ F_perm <- function(R, l_max){
   return(F.l = F.l)
 }
 
+					     
 J_theta <- function(F.input, F.temp, l_max)
 {
   ## Calulates the value of the objective function J. 
@@ -177,6 +181,7 @@ FRgeneral <- function(theta, studies, l_max, R.input, F.input,increments=NULL)
   return(list(J = J.theta, F = F.temp, R = R.temp))	
 }
 
+		 
 what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
 {
   ## Estimates a st.dev. needed to create a rank matrix as similar to R.input as possible, using the vector theta. 
@@ -205,6 +210,7 @@ what.is.suitable.sigma <- function(theta, R.input, increments=NULL)
   return(sigma)
 }
 
+		 
 real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL) 
 {
  ## Calculates the value of the objective/fitness function J
@@ -227,6 +233,7 @@ real.fitness <- function(theta, n, p, l_max, F.input, R.input, increments=NULL)
  return(-J.theta)
 } 
 
+	   
 #-----------------------------------------------
 #
 #    Classical Metropolis-Hastings algorithm 
@@ -262,6 +269,7 @@ MCMC.metropolis <- function(theta.inis,in.data, dev, chain.len, cores=detectCore
   return(list(avg=res, runtime=runtime))
 }
 
+			   
 onerun <- function(theta.ini, input, dev=NULL, its, l_max, increments=NULL){ 
   ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. 
   ## Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), 
@@ -298,6 +306,7 @@ onerun <- function(theta.ini, input, dev=NULL, its, l_max, increments=NULL){
   else all.x.in.mins = x.at.mins
   return(list(x.in.min=all.x.in.mins, chain=res.chain, minJ=min(res.chain$Js), acceptance=acceptance))
 }
+
 					     
 run_metropolis_MCMC <- function(theta.ini, iterations, dev, Ri, Fi,l_0,increments=NULL){
   ## Calculates Metropolis MCMC chain. Outputs the chain (all visited points) and the values of J in ech point.
@@ -340,6 +349,7 @@ run_metropolis_MCMC <- function(theta.ini, iterations, dev, Ri, Fi,l_0,increment
   return(list(chain=chain, Js=Js))
 }
 
+					     
 proposalfunction <- function(param, stdev){
   ## Calculates a proposal of the next step in MCMC algorithm
   # param - a numerical vector (current point)
@@ -387,6 +397,7 @@ adaptive.MCMC.metropolis <- function(theta.inis, in.data, chain.len,  cores=dete
   return(list(avg=res, runtime=runtime))
 }
 
+			   
 onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL, scale=NULL){ # 
   ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. 
   ## Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), 
