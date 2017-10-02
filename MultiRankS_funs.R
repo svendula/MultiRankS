@@ -410,6 +410,7 @@ onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL,
   Ri = input[[1]]
   Fi = input[[2]]
   
+  library(adaptMCMC)
   res = MCMC(p=function(x) real.fitness(x,n=ncol(Ri),p=nrow(Ri),l_max,Fi,Ri,increments), n=its, init=theta.ini, acc.rate = 0.234, scale=scale,adapt=TRUE, n.start=100)
   minimum = res$samples[its,]
   minJ=-max(res$log.p)
