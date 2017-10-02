@@ -23,7 +23,7 @@ Set up parameters (generally, larger values add to precision but also computatin
 source('MultiRankS_funs.R')
 p = 5 # number of objects
 n = 10 # number of rankers
-l_max = 2 # maximum height of the sliding window (larger value = longer computation)
+l_max = 2 # maximum height of the sliding window 
 num.boot = 10 # number of bootstrap samples 
 chain.length = 1000 # length of the MCMC chain
 num.sim = 5 # number of independent chains
