@@ -10,13 +10,7 @@ http://www.sciencedirect.com/science/article/pii/S0167947317301056
 Here the source code and genomic application data and results are provided, under the terms of the LGPLv3 [`license`](https://github.com/svendula/MultiRankS/blob/master/LICENSE).
 
 ## Source code
-The code can be loaded in R using devtools:
-```r
-library(devtools)
-install_github("svendula/MultiRankS")
-```
-
-If this does not work (because of proxy for example), you need to save the file `MultiRankS_funs.R` locally and run the script in R using `source('MultiRankS_funs.R')`.
+Currently, the code cannot be installed directly from GitHub. To use the method, you need to save the file `MultiRankS_funs.R` locally and run the script in R using `source('MultiRankS_funs.R')`.
 
 [`MultiRankS_funs.R`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R): The source code of the algorithm.
 
