@@ -11,8 +11,10 @@ Here the source code and genomic application data and results are provided, unde
 
 ## Source code
 The code can be loaded in R using devtools:
-`library(devtools)'
-`install_github("svendula/MultiRankS")'
+```r
+library(devtools)
+install_github("svendula/MultiRankS")
+```
 
 If this does not work (because of proxy for example), you need to save the file `MultiRankS_funs.R` locally and run the script in R using `source('MultiRankS_funs.R')`.
 
