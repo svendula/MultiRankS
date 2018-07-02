@@ -18,9 +18,9 @@ Currently, the code cannot be installed directly from GitHub. To use the method,
 
 
 ## Example of usage
-The input for the algorithm is a matrx of ranks, rankers are in columns and ranked objects in rows. The underlying signal (latent variable) is estimated using adaptive MCMC. Standard errors (SE) of the signals can be estimated either with non-parametric bootstrap (quite very slow) oe subsampling batch means method (much faster and equally or even more reliable). Both examples below. 
+The input for the algorithm is a matrix of ranks, rankers are in columns and ranked objects in rows. The underlying signal (latent variable) is estimated using adaptive MCMC. Standard errors (SE) of the signals can be estimated either with non-parametric bootstrap (quite very slow) or with subsampling batch means method (much faster and equally or even more reliable). Both examples below. 
 
-# Using non-parametric bootstrap for standard error (SE)
+### Using non-parametric bootstrap for standard error (SE)
 
 Set up parameters (generally, larger values add to precision but also computational time)
 ```r
@@ -49,7 +49,7 @@ results.by.boot = run.adaptiveMCMC(F.input, boots, num.sim, chain.length)
 estimate = gather.results(results.by.boot)
 ```
 
-# Using subsampling batch means for SE estimates 
+### Using subsampling batch means for SE estimates 
 Set up parameters (generally, larger values add to precision but also computational time)
 ```r
 source('MultiRankS_funs.R')
