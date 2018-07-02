@@ -17,8 +17,8 @@ Currently, the code cannot be installed directly from GitHub. To use the method,
 [`README_MultiRankS`](https://github.com/svendula/MultiRankS/blob/master/README_MultiRankS.md): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R)
 
 
-## Example of usage
-Set up parameters (generally, larger values add to precision but also computatinal time)
+## Example of usage, using non-parametric bootstrap for standard error (SE) estimates (computationally quite expensive)
+Set up parameters (generally, larger values add to precision but also computational time)
 ```r
 source('MultiRankS_funs.R')
 p = 5 # number of objects
@@ -28,8 +28,7 @@ num.boot = 10 # number of bootstrap samples
 chain.length = 1000 # length of the MCMC chain
 num.sim = 5 # number of independent chains
 ```
-Create a random matrix of ranks `R.input` - objects in rows, rankers in columns:
-```r
+Save your input rank matrix into `R.input` - objects in rows, rankers in columns. Here we create a random input matrix of ranks `R.input`:```r
 R.input = generate.random.rank.matrix(p,n)
 ```
 Create bootstrap matrices
@@ -40,10 +39,34 @@ Calculate the list of probability matrices for the input:
 ```r
 F.input = F_perm(R.input, l_max) 
 ```
-Run adaptive MCMC
+Run adaptive MCMC, calculate standard errors (SE) with non-parametric bootstrap
 ```r
 results.by.boot = run.adaptiveMCMC(F.input, boots, num.sim, chain.length)
 estimate = gather.results(results.by.boot)
+```
+
+## Example of usage, using subsampling batch means for SE estimates (computationally more efficient than the bootstrap SEs above)
+Set up parameters (generally, larger values add to precision but also computational time)
+```r
+source('MultiRankS_funs.R')
+p = 5 # number of objects
+n = 10 # number of rankers
+l_max = 2 # maximum height of the sliding window 
+chain.length = 1000 # length of the MCMC chain
+num.sim = 5 # number of independent chains
+```
+Save your input rank matrix into `R.input` - objects in rows, rankers in columns. Here we create a random input matrix of ranks `R.input`:
+```r
+R.input = generate.random.rank.matrix(p,n)
+```
+Calculate the list of probability matrices for the input:
+```r
+F.input = F_perm(R.input, l_max) 
+```
+Run adaptive MCMC, calculate standard errors (SE) with subsampling batch means
+```r
+results.by.boot = run.adaptiveMCMC.batchmeans(F.input, boots, num.sim, chain.length)
+
 ```
 
 ## Application example in Švendová, Schimek (2017).
