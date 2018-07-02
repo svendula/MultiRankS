@@ -103,8 +103,7 @@ return(est.plus.SE)
 }
 		      
 calculate.averaged.minima <- function(win.size, res, num.sim, steps, p, method=list('MH','adaptive')){
-# 1. Looking up the minimum in each chain and corresponding +-X points
-###########################################################################
+#Looking up the minimum in each chain and corresponding +-X points
 # method: MH- Metropolis-Hastings or adaptive MCMC
 #		  adaptive - adaptive MCMC
 Js = matrix(nrow=num.sim, ncol=steps)
