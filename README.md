@@ -46,7 +46,7 @@ results.by.boot = run.adaptiveMCMC(F.input, boots, num.sim, chain.length)
 estimate = gather.results(results.by.boot)
 ```
 
-## Application example in the reference article
+## Application example in Švendová, Schimek (2017).
 
 The application example in the paper above was based on data from:
 
