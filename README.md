@@ -65,7 +65,7 @@ F.input = F_perm(R.input, l_max)
 ```
 Run adaptive MCMC, calculate standard errors (SE) with subsampling batch means
 ```r
-results.by.boot = run.adaptiveMCMC.batchmeans(F.input, boots, num.sim, chain.length)
+results = run.adaptiveMCMC.batchmeans(F.input, R.input, num.chains=num.sim, chain.length=chain.length, win.size=1000)
 
 ```
 
