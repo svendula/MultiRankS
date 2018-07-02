@@ -17,7 +17,11 @@ Currently, the code cannot be installed directly from GitHub. To use the method,
 [`README_MultiRankS`](https://github.com/svendula/MultiRankS/blob/master/README_MultiRankS.md): a description of all the functions in [`MultiRankS_funs.R`](https://github.com/svendula/MultiRankS/blob/master/MultiRankS_funs.R)
 
 
-## Example of usage, using non-parametric bootstrap for standard error (SE) estimates (computationally quite expensive)
+## Example of usage
+The input for the algorithm is a matrx of ranks, rankers are in columns and ranked objects in rows. The underlying signal (latent variable) is estimated using adaptive MCMC. Standard errors (SE) of the signals can be estimated either with non-parametric bootstrap (quite very slow) oe subsampling batch means method (much faster and equally or even more reliable). Both examples below. 
+
+# Using non-parametric bootstrap for standard error (SE)
+
 Set up parameters (generally, larger values add to precision but also computational time)
 ```r
 source('MultiRankS_funs.R')
@@ -45,7 +49,7 @@ results.by.boot = run.adaptiveMCMC(F.input, boots, num.sim, chain.length)
 estimate = gather.results(results.by.boot)
 ```
 
-## Example of usage, using subsampling batch means for SE estimates (computationally more efficient than the bootstrap SEs above)
+# Using subsampling batch means for SE estimates 
 Set up parameters (generally, larger values add to precision but also computational time)
 ```r
 source('MultiRankS_funs.R')
@@ -65,7 +69,7 @@ F.input = F_perm(R.input, l_max)
 ```
 Run adaptive MCMC, calculate standard errors (SE) with subsampling batch means
 ```r
-results = run.adaptiveMCMC.batchmeans(F.input, R.input, num.chains=num.sim, chain.length=chain.length, win.size=1000)
+estimate = run.adaptiveMCMC.batchmeans(F.input, R.input, num.chains=num.sim, chain.length=chain.length, win.size=1000)
 
 ```
 
