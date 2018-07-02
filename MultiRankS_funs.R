@@ -10,6 +10,7 @@ library(ggplot2)
 library(grid)
 library(parallel)
 library(adaptMCMC)
+library(mcmcse)
 
 
 gather.results <- function(res)
@@ -40,7 +41,7 @@ gather.results <- function(res)
 }
 
 
-run.adaptiveMCMC <- function(F.input, boots, num.chains=10, chain.length, cores=detectCores(), inis=c(-1,1))
+run.adaptiveMCMC.bootstrap <- function(F.input, boots, num.chains=10, chain.length, cores=detectCores(), inis=c(0,1))
 {
   # F.input - probability matrix for the input rank matrix
   # boots - output of generate.bootstrap.samples
@@ -60,10 +61,119 @@ run.adaptiveMCMC <- function(F.input, boots, num.chains=10, chain.length, cores=
       res.temp = adaptive.MCMC.metropolis(theta.inis = theta.inis, in.data=list(boots[[b]], F.input), chain.len=chain.length, cores=cores, l_max=length(F.input))
     res[[b]] = res.temp
   }
+ 
   return(res)
 }
 
+run.adaptiveMCMC.batchmeans <- function(F.input, R.input, num.chains=10, chain.length, win.size, cores=detectCores(), inis=c(0,1))
+{
+  # F.input - probability matrix for the input rank matrix
+  # num.chains - number of independent chains
+  # chain.length - length of each chain
+  # win.size - size of the window around minima for which batch means is calculated
+  # cores - number of cores to run on (running of chains parallelised)
+  # inis - range from which to generate initial guesses (from uniform distribution)
+  p=nrow(R.input); n=ncol(R.input)
+  res = list() # here the results are stored
+  
+  set.seed(123)
+  theta.inis = vector('list',num.chains)# initial guesses - one for each chain
+  theta.inis = lapply(theta.inis, function(x) x= runif(p, inis[1], inis[2]))
+  res = adaptive.MCMC.metropolis(theta.inis = theta.inis, in.data=list(R.input, F.input), chain.len=chain.length, cores=cores, l_max=length(F.input))
+  
 
+indiv.estimates = matrix(nrow=p, ncol=num.chains)
+for (i in 1:num.chains)
+    	{	
+      		if (is.numeric(res$avg[[i]]$x.in.min))
+        	indiv.estimates[,i] = res$avg[[i]]$x.in.min
+      		else indiv.estimates[,i] = res$avg[[i]]$x.in.min[,1]
+    	}
+    m = apply(indiv.estimates, 1, median) # median over 10 independent chains
+    main.nrm.estimate = m/norm_vec(m) # normalisation
+    		      
+     averaged.minima = calculate.averaged.minima(win.size = win.size, res=res$avg, num.sim=num.chains, steps=chain.length, p=p, method='adaptive')
+      num.points = nrow(averaged.minima)
+      batch.size = floor(num.points^(1/3))
+      mcerror_bm = mcse.multi(averaged.minima, method = 'bm',size=batch.size)
+      SE_bm = sqrt(diag(mcerror_bm$cov))	      
+
+est.plus.SE = data.frame(signal.estimate = main.nrm.estimate, SE=SE_bm)
+return(est.plus.SE)
+}
+		      
+calculate.averaged.minima <- function(win.size, res, num.sim, steps, p, method=list('MH','adaptive')){
+# 1. Looking up the minimum in each chain and corresponding +-X points
+###########################################################################
+# method: MH- Metropolis-Hastings or adaptive MCMC
+#		  adaptive - adaptive MCMC
+Js = matrix(nrow=num.sim, ncol=steps)
+chains.step = lapply(1:num.sim, matrix, nrow=steps, ncol=p)
+window.x = rep(list(), num.sim ) 
+min.x = list()
+for (chain.num in 1:num.sim)
+{
+  for (step in 1:steps) # reading values of J(x) and x
+  {
+    
+	if (method=='MH'){
+		chains.step[[chain.num]][step,] = res[[chain.num]]$chain$chain[,step]
+		Js[chain.num,step] = res[[chain.num]]$chain$Js[step]
+		}
+	if (method=='adaptive'){
+		chains.step[[chain.num]][step,] = res[[chain.num]][[1]]$samples[step,]
+		Js[chain.num,step] = res[[chain.num]]$Js[step]
+		}
+  }
+  # looking for minima and window of size +-X around them
+  minJ = min(Js[chain.num,])
+  min.x[[chain.num]] = matrix(chains.step[[chain.num]][which(Js[chain.num,] == minJ),], ncol=p)
+  dupl = apply(min.x[[chain.num]],2,duplicated) ## find duplicated columns
+  if (is.matrix(dupl))
+    min.x[[chain.num]] = matrix(min.x[[chain.num]][which(apply(dupl,1,function(x) sum(x)) !=p), ], ncol=p)
+  
+  pos.minJ = which(Js[chain.num,] == minJ)
+  if (pos.minJ[1] > steps-win.size/2)
+  {
+    min.ind = steps - win.size
+    max.ind = steps - 1 
+  } else if (pos.minJ[1] < win.size/2)
+  {
+    min.ind = 1
+    max.ind = win.size
+  } else
+  {
+    min.ind = pos.minJ[1] - win.size/2
+    max.ind = pos.minJ[1] + win.size/2 - 1
+  }
+
+  window.x[[chain.num]] = chains.step[[chain.num]][min.ind[1]:max.ind[1],]
+
+}
+
+# cumulating minima, averaging and normalising
+super.window = matrix(nrow = nrow(window.x[[1]]), ncol=p)
+
+for (win.points in 1:nrow(window.x[[1]]))
+{
+  for (obj in 1:p)
+  {
+    to.average=numeric()
+    for (chain in 1:length(window.x))
+    {
+      to.average[chain] = window.x[[chain]][win.points,obj]
+    }
+    super.window[win.points, obj] = median(to.average)
+  }
+  x = super.window[win.points,]
+  super.window[win.points,] = x/norm_vec(x)
+}
+
+
+return(super.window)
+}
+
+	      
 generate.bootstrap.samples <- function(R,num.boot)
 {
   # R - the input matrix
@@ -366,16 +476,16 @@ proposalfunction <- function(param, stdev){
 #
 #-------------------------------------------
 
-adaptive.MCMC.metropolis <- function(theta.inis, in.data, chain.len,  cores=detectCores(), l_max=NULL, increments=NULL, scale=NULL){
-  ## Runs several independent Metropolis MCMC chains (function onerun()). 
-  ## Number of chains depends on the length of initial guesses theta.inis. 
-  ## Outputs list of the results (chain + best estimate + minimum found) and runtime.
+adaptive.MCMC.metropolis <- function(theta.inis,in.data, chain.len, cores=detectCores(), l_max=NULL, increments=NULL, scale=NULL){
+  ## Runs several independent Metropolis MCMC chains (function onerun()). Number of chains depends on the length of initial guesses theta.inis. Outputs list of the results (chain + best estimate + minimum found) and runtime
+  
   # theta.inis - a list of vectors of initial guesses, the length of the list determines the number of chains 
   # in.data - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
   # dev - the standard deviation defining every next proposal step of the random walk
   # chain.len - length of each chain
   # cores - number of cores to be used
   # increments - see what.is.suitable.sigma() function
+  # scale - see what.is.suitable.sigma() function
   if (is.null(increments)) increments=0.01
   if (is.null(l_max)) l_max=2
   if (is.null(scale)) scale=rep(0.1,length(theta.inis[[1]]))
@@ -397,11 +507,9 @@ adaptive.MCMC.metropolis <- function(theta.inis, in.data, chain.len,  cores=dete
   return(list(avg=res, runtime=runtime))
 }
 
-			   
 onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL, scale=NULL){ # 
-  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. 
-  ## Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), 
-  ## and the value of the minimum (minJ).
+  ## Runs one chain of the Metropolis MCMC (function run_metropolis_MCMC()) and finds the minima. Outputs all found vectors where the minimum was found (x.in.min), all points of the chain(res.chain), and the value of the minimum (minJ).
+  
   # theta.ini - the initial guess (numeric vector)
   # input - list of 2: first rank matrix R, second list of matrices F (result of F_perm)
   # its - length of the chain
@@ -422,8 +530,8 @@ onerun.adaptive <- function(theta.ini, input,  its, l_max=NULL, increments=NULL,
   Fi = input[[2]]
   
   library(adaptMCMC)
-  res = MCMC(p=function(x) real.fitness(x,n=ncol(Ri),p=nrow(Ri),l_max,Fi,Ri,increments), n=its, init=theta.ini, acc.rate = 0.234, scale=scale,adapt=TRUE, n.start=100)
+  res = MCMC(p=function(x) real.fitness(x,n=ncol(Ri),p=nrow(Ri),l_max,Fi,Ri,increments), n=its, init=theta.ini, acc.rate = 0.234, scale=scale,adapt=TRUE, n.start=100, list=TRUE)
   minimum = res$samples[its,]
   minJ=-max(res$log.p)
-  return(list(x.in.min=minimum, Js=res$log.p, minJ=minJ))
-}
+  return(list(res, x.in.min=minimum, Js=res$log.p, minJ=minJ))
+  }
