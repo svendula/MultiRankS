@@ -32,7 +32,8 @@ num.boot = 10 # number of bootstrap samples
 chain.length = 1000 # length of the MCMC chain
 num.sim = 5 # number of independent chains
 ```
-Save your input rank matrix into `R.input` - objects in rows, rankers in columns. Here we create a random input matrix of ranks `R.input`:```r
+Save your input rank matrix into `R.input` - objects in rows, rankers in columns. Here we create a random input matrix of ranks `R.input`:
+```r
 R.input = generate.random.rank.matrix(p,n)
 ```
 Create bootstrap matrices
