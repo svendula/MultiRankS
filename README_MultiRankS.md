@@ -3,7 +3,9 @@
 Functions description:
 
   - `gather.results`: gather the estimate (mean over bootstraps) and standard error for each object
-  - `run.adaptiveMCMC`: run adaptive MCMC on each bootstrap sample 
+  - `run.adaptiveMCMC.bootstrap`: run adaptive MCMC on each bootstrap sample 
+  - `run.adaptiveMCMC.batchmeans`: run adaptive MCMC and calculate SEs with batch means method
+  - `calculate.averaged.minima`: looking up the minimum in each chain and corresponding +-X points
   - `generate.bootstrap.samples`: generate bootstrap rank matrices
   - `generate.random.rank.matrix`: generate an examplematrix of rankings of objects (rows) by rankers (columns)
   - `norm_vec`: normalises a vector in order to have unit norm
