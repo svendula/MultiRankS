@@ -73,6 +73,8 @@ run.adaptiveMCMC.batchmeans <- function(F.input, R.input, num.chains=10, chain.l
   # win.size - size of the window around minima for which batch means is calculated
   # cores - number of cores to run on (running of chains parallelised)
   # inis - range from which to generate initial guesses (from uniform distribution)
+if (chain.length<win.size)
+    stop("Window size has to be < than length of the chain")
   p=nrow(R.input); n=ncol(R.input)
   res = list() # here the results are stored
   
