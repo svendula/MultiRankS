@@ -46,7 +46,7 @@ F.input = F_perm(R.input, l_max)
 ```
 Run adaptive MCMC, calculate standard errors (SE) with non-parametric bootstrap
 ```r
-results.by.boot = run.adaptiveMCMC(F.input, boots, num.sim, chain.length)
+results.by.boot = run.adaptiveMCMC.bootstrap(F.input, boots, num.sim, chain.length)
 estimate = gather.results(results.by.boot)
 ```
 
