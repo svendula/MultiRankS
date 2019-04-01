@@ -34,7 +34,9 @@ num.sim = 5 # number of independent chains
 ```
 Save your input rank matrix into `R.input` - objects in rows, rankers in columns. Here we create a random input matrix of ranks `R.input`:
 ```r
-R.input = generate.random.rank.matrix(p,n)
+input = generate.random.rank.matrix(p,n)
+theta.true = input[[1]]
+R.input = input[[2]]
 ```
 Create bootstrap matrices
 ```r
