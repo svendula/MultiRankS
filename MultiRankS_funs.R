@@ -209,7 +209,7 @@ generate.random.rank.matrix <- function(p,n)
   
   R.input = matrix(nrow=p, ncol=n) # the observed rankings 
   R.input = apply(X.input, 2, function(x) rank(-x)) 
-  return(R.input)
+  return(list(theta.true, R.input))
 }
 
 		  
